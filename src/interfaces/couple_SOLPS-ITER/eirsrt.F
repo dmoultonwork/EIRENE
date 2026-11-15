@@ -106,6 +106,7 @@ C
       REAL(DP) :: DELTAT, B2BRM, B2RD, B2Q, B2VP, STEP_CPU
       LOGICAL :: LSTOP, LTIME
       logical :: ltrigger
+      integer :: req_trig
 
       REAL(DP) :: EIRENE_FTABEI1, EIRENE_FEELEI1, ESIG,
      .            DUMMY, DTIMVO, EN
@@ -149,8 +150,10 @@ csw 28feb2011 mpi
         step_cpu=step_cpu_in
 
         ltrigger=.true.
-        call mpi_bcast(ltrigger,1,MPI_LOGICAL,
-     .                 0,MPI_COMM_WORLD,ierr_mpi)
+c       non-blocking, to match the sleeping wait of the child ranks
+        call mpi_ibcast(ltrigger,1,MPI_LOGICAL,
+     .                 0,MPI_COMM_WORLD,req_trig,ierr_mpi)
+        call mpi_wait(req_trig,MPI_STATUS_IGNORE,ierr_mpi)
       endif
       call mpi_bcast(lstop,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr_mpi)
       call mpi_bcast(ltime,1,MPI_LOGICAL,0,MPI_COMM_WORLD,ierr_mpi)
